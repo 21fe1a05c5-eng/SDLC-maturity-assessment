@@ -2,8 +2,7 @@
 -- SDLC Maturity Assessment App - MySQL Schema
 -- ================================================
 
-CREATE DATABASE IF NOT EXISTS sdlc_maturity CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE sdlc_maturity;
+-- (Removed database creation/selection to use current active connection database)
 
 -- ------------------------------------------------
 -- Users Table

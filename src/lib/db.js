@@ -13,7 +13,12 @@ function getPool() {
   if (!global.mysqlPool) {
     const connectionUri = process.env.MYSQL_URL || process.env.DATABASE_URL;
     if (connectionUri) {
-      global.mysqlPool = mysql.createPool(connectionUri);
+      global.mysqlPool = mysql.createPool({
+        uri: connectionUri,
+        ssl: {
+          rejectUnauthorized: false
+        }
+      });
     } else {
       global.mysqlPool = mysql.createPool({
         host:     process.env.DB_HOST     || process.env.MYSQLHOST     || 'localhost',
@@ -24,7 +29,10 @@ function getPool() {
         waitForConnections: true,
         connectionLimit: 10,
         queueLimit: 0,
-        charset: 'utf8mb4'
+        charset: 'utf8mb4',
+        ssl: {
+          rejectUnauthorized: false
+        }
       });
     }
   }

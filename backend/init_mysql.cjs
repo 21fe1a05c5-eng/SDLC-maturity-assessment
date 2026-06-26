@@ -39,7 +39,10 @@ async function main() {
       console.log(`\n🚀 Connecting to MySQL using connection URI...`);
       connection = await mysql.createConnection({
         uri: connectionUri,
-        multipleStatements: true
+        multipleStatements: true,
+        ssl: {
+          rejectUnauthorized: false
+        }
       });
     } else {
       const config = {
@@ -47,7 +50,10 @@ async function main() {
         port: parseInt(process.env.DB_PORT || process.env.MYSQLPORT || '3306'),
         user: process.env.DB_USER || process.env.MYSQLUSER || 'root',
         password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || 'password',
-        multipleStatements: true
+        multipleStatements: true,
+        ssl: {
+          rejectUnauthorized: false
+        }
       };
       console.log(`\n🚀 Connecting to MySQL at ${config.host}:${config.port} as '${config.user}'...`);
       connection = await mysql.createConnection(config);

@@ -2,6 +2,9 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import fs from 'fs';
+import path from 'path';
+import mysql from 'mysql2/promise';
 import {
   getUsers,
   createUser,
@@ -903,9 +906,44 @@ Strict Requirements:
     }
   }
 });
-if (process.env.RUN_DB_INIT === "true") {
-  import("./init_mysql.cjs");
+async function initDatabase() {
+  try {
+    const connectionUri = process.env.MYSQL_URL || process.env.DATABASE_URL;
+    let connection;
+    if (connectionUri) {
+      connection = await mysql.createConnection({
+        uri: connectionUri,
+        multipleStatements: true,
+        ssl: { rejectUnauthorized: false }
+      });
+    } else {
+      connection = await mysql.createConnection({
+        host:     process.env.DB_HOST     || process.env.MYSQLHOST     || 'localhost',
+        port:     parseInt(process.env.DB_PORT || process.env.MYSQLPORT || '3306'),
+        user:     process.env.DB_USER     || process.env.MYSQLUSER     || 'root',
+        password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || 'root123',
+        database: process.env.DB_NAME     || process.env.MYSQLDATABASE     || 'sdlc_maturity',
+        multipleStatements: true,
+        ssl: { rejectUnauthorized: false }
+      });
+    }
+
+    const schemaPath = path.join(process.cwd(), 'mysql_schema.sql');
+    if (!fs.existsSync(schemaPath)) {
+      console.error('❌ Schema file not found at:', schemaPath);
+      return;
+    }
+    const sql = fs.readFileSync(schemaPath, 'utf8');
+    await connection.query(sql);
+    console.log('✅ Database initialized successfully');
+    await connection.end();
+  } catch (err) {
+    console.error('❌ DB init failed:', err.message);
+  }
 }
+
+initDatabase();
+
 // Start listening
 app.listen(PORT, () => {
   console.log(`🚀 Backend Express server running on port ${PORT}`);

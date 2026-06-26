@@ -903,7 +903,9 @@ Strict Requirements:
     }
   }
 });
-
+if (process.env.RUN_DB_INIT === "true") {
+  import("./init_mysql.cjs");
+}
 // Start listening
 app.listen(PORT, () => {
   console.log(`🚀 Backend Express server running on port ${PORT}`);
